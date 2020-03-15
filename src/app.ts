@@ -1,31 +1,18 @@
 import express from 'express';
-import cors from 'cors';
-import bodyParser from 'body-parser';
-import fetchJSON from './util/fetchJSON';
-import { IFilm } from './types/types';
-import { TMPDbAPI } from './util/constants';
+
+// Importing modules
+import { discover } from './controllers/TMDb';
+import { register } from './controllers/User';
+
+// .env for development purposes
 require('dotenv').config();
 
 const app = express();
 
-app.use(cors());
-app.use(bodyParser.json());
+// TMDb related API routes
+app.get('/discover', discover);
 
-app.get('/homepage-discover', (req, res) => {
-  fetchJSON({
-    url: TMPDbAPI + '/discover/movie?api_key=' + process.env.TMDbAPI_KEY,
-    method: 'get'
-  }).then((data) => {
-    const tmp: IFilm[] = data.results.reduce((acc: any, film: any) => {
-      acc.push({
-        title: film.title,
-        averageRating: film.vote_average,
-        posthPath: film.poster_path
-      });
-      return acc;
-    }, []);
-    res.status(200).send(tmp);
-  });
-});
+// New User registration route
+app.get('/register', register);
 
 export default app;
