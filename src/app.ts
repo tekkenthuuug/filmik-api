@@ -8,6 +8,7 @@ import nodemailer from 'nodemailer';
 import { discover } from './controllers/TMDb';
 import { handleRegister } from './controllers/userRegister';
 import { handleSendCode } from './controllers/sendCode';
+import { handleConfirm } from './controllers/userConfirmation';
 
 // .env for development purposes
 require('dotenv').config();
@@ -41,7 +42,9 @@ app.get('/discover', discover);
 
 // New User registration route
 app.post('/register', handleRegister(db));
-
-app.post('/sendCode', handleSendCode(db, transporter));
+// Sends varification code if user is not varified yet
+app.get('/sendCode/:id', handleSendCode(db, transporter));
+// Route that recieves and checks confirmation code
+app.put('/confirm', handleConfirm(db));
 
 export default app;

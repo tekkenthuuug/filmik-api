@@ -22,6 +22,7 @@ export const handleRegister = (db: Knex) => async (req: Request, res: Response) 
           .returning('*')
           .insert({
             username,
+            email,
             joined: new Date()
           })
           .then((data) => {
@@ -33,7 +34,6 @@ export const handleRegister = (db: Knex) => async (req: Request, res: Response) 
       .then(trx.commit)
       .catch(trx.rollback);
   }).catch((err) => {
-    console.log(err);
     res.status(400).send({
       error: {
         details: 'Username is taken'
