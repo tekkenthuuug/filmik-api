@@ -7,7 +7,6 @@ import nodemailer from 'nodemailer';
 // Importing modules
 import { discover } from './controllers/TMDb';
 import { handleRegister } from './controllers/userRegister';
-import { handleSendCode } from './controllers/sendCode';
 import { handleConfirm } from './controllers/userConfirmation';
 
 // .env for development purposes
@@ -41,10 +40,9 @@ const transporter = nodemailer.createTransport({
 app.get('/discover', discover);
 
 // New User registration route
-app.post('/register', handleRegister(db));
-// Sends varification code if user is not varified yet
-app.get('/sendCode/:id', handleSendCode(db, transporter));
+app.post('/register', handleRegister(db, transporter));
+
 // Route that recieves and checks confirmation code
-app.put('/confirm', handleConfirm(db));
+app.put('/register/confirm', handleConfirm(db));
 
 export default app;
