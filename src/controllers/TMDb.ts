@@ -20,3 +20,12 @@ export const discover = (req: Request, res: Response) => {
     res.status(200).send(tmp);
   });
 };
+
+export const searchFilms = (req: Request, res: Response) => {
+  fetchJSON({
+    url: `${TMPDbAPI}/search/movie?api_key=${process.env.TMDbAPI_KEY}&query=${req.params.title}`,
+    method: 'get'
+  }).then((data) => {
+    res.status(200).send(data);
+  });
+};

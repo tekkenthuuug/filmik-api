@@ -52,10 +52,9 @@ export const handleRegister = (db: Knex, transporter: Mail) => (req: Request, re
       .then(trx.commit)
       .catch(trx.rollback);
   }).catch((err) => {
-    // @todo recognize type of error (username or email?)
     res.status(400).send({
       error: {
-        details: 'Username is taken'
+        details: 'Username or email already exists'
       }
     });
   });

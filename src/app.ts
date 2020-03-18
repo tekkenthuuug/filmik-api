@@ -5,9 +5,10 @@ import knex from 'knex';
 import nodemailer from 'nodemailer';
 
 // Importing modules
-import { discover } from './controllers/TMDb';
+import { discover, searchFilms } from './controllers/TMDb';
 import { handleRegister } from './controllers/userRegister';
 import { handleConfirm } from './controllers/userConfirmation';
+import { handleLogin } from './controllers/userLogin';
 
 // .env for development purposes
 require('dotenv').config();
@@ -38,11 +39,15 @@ const transporter = nodemailer.createTransport({
 
 // TMDb related API routes
 app.get('/discover', discover);
+app.get('/discover/:title', searchFilms);
 
 // New User registration route
 app.post('/register', handleRegister(db, transporter));
 
 // Route that recieves and checks confirmation code
 app.put('/register/confirm', handleConfirm(db));
+
+// User login route
+app.post('/login', handleLogin(db, transporter));
 
 export default app;
