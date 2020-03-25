@@ -1,8 +1,12 @@
 import express from 'express';
-import cors from 'cors';
-import bodyParser from 'body-parser';
 import knex from 'knex';
 import nodemailer from 'nodemailer';
+import morgan from 'morgan';
+
+// Middleware
+import cors, { CorsOptions } from 'cors';
+import bodyParser from 'body-parser';
+import helmet from 'helmet';
 
 // Importing modules
 import { discover, searchFilms } from './controllers/TMDb';
@@ -10,26 +14,20 @@ import { handleRegister } from './controllers/userRegister';
 import { handleConfirm } from './controllers/userConfirmation';
 import { handleLogin } from './controllers/userLogin';
 
-// .env for development purposes
-require('dotenv').config();
-
 const app = express();
 
 app.use(bodyParser.json());
 app.use(cors());
+app.use(helmet());
+app.use(morgan('combined'));
 
 const db = knex({
   client: 'pg',
-  connection: {
-    host: '127.0.0.1',
-    user: 'postgres',
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME
-  }
+  connection: process.env.POSTGRES_URI
 });
 
 // create reusable transporter object using the default SMTP transport
-const transporter = nodemailer.createTransport({
+export const transporter = nodemailer.createTransport({
   service: 'Gmail',
   auth: {
     user: process.env.GMAIL_USER,

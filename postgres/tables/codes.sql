@@ -1,0 +1,10 @@
+BEGIN TRANSACTION;
+
+CREATE TABLE codes
+(
+  id int PRIMARY KEY NOT NULL,
+  email text UNIQUE NOT NULL,
+  code VARCHAR(6) NOT NULL
+);
+
+COMMIT;
