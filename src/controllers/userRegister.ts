@@ -4,23 +4,14 @@ import bcrypt from 'bcryptjs';
 import Mail from 'nodemailer/lib/mailer';
 import generateCode from '../util/generateCode';
 import sendEmailWithCode from '../util/sendEmailWithCode';
-
-const setUserCode = (db: Knex, id: any, email: any, confirmationCode: string) => {
-  return new Promise<boolean>((resolve, reject) => {
-    return db
-      .into('codes')
-      .insert({
-        id,
-        email,
-        code: confirmationCode
-      })
-      .then(() => resolve(true))
-      .catch(() => resolve(false));
-  });
-};
+import { RedisClient } from 'redis';
+import setUserCode from '../util/setRedisUserCode';
 
 /** Registers new user */
-export const handleRegister = (db: Knex, transporter: Mail) => (req: Request, res: Response) => {
+export const handleRegister = (db: Knex, transporter: Mail, redisClient: RedisClient) => (
+  req: Request,
+  res: Response
+) => {
   const { username, password, email } = req.body;
 
   if (!username || !password || !email) {
@@ -46,7 +37,7 @@ export const handleRegister = (db: Knex, transporter: Mail) => (req: Request, re
           .then(([data]) => {
             res.status(200).send({ id: data });
             const confirmationCode = generateCode(6);
-            setUserCode(db, id, email, confirmationCode).then((isSet) => {
+            setUserCode(redisClient, id, confirmationCode).then((isSet) => {
               if (isSet) {
                 sendEmailWithCode(transporter, email, confirmationCode, username);
               }

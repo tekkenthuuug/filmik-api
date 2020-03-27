@@ -4,23 +4,11 @@ import { Request, Response } from 'express';
 import Mail from 'nodemailer/lib/mailer';
 import generateCode from '../util/generateCode';
 import sendEmailWithCode from '../util/sendEmailWithCode';
-
-const updateUserCode = (db: Knex, confirmationCode: string, email: string) => {
-  return new Promise<boolean>(async (resolve, reject) => {
-    return db('codes')
-      .update({
-        code: confirmationCode
-      })
-      .where({ email })
-      .then(async () => {
-        resolve(true);
-      })
-      .catch(() => resolve(false));
-  });
-};
+import setRedisUserCode from '../util/setRedisUserCode';
+import { RedisClient } from 'redis';
 
 /** Handles request with a confirmation code, verifyes account */
-export const handleLogin = (db: Knex, transporter: Mail) => (req: Request, res: Response) => {
+export const handleLogin = (db: Knex, transporter: Mail, redisClient: RedisClient) => (req: Request, res: Response) => {
   const { login, password } = req.body;
   db.select('*')
     .from('login')
@@ -48,7 +36,7 @@ export const handleLogin = (db: Knex, transporter: Mail) => (req: Request, res: 
 
         if (!verified) {
           const confirmationCode = generateCode(6);
-          updateUserCode(db, confirmationCode, email).then((isUpdated) => {
+          setRedisUserCode(redisClient, id, confirmationCode).then((isUpdated) => {
             if (isUpdated) {
               sendEmailWithCode(transporter, email, confirmationCode, username);
             }

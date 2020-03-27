@@ -2,6 +2,7 @@ import express from 'express';
 import knex from 'knex';
 import nodemailer from 'nodemailer';
 import morgan from 'morgan';
+import redis from 'redis';
 
 // Middleware
 import cors, { CorsOptions } from 'cors';
@@ -26,6 +27,8 @@ const db = knex({
   connection: process.env.POSTGRES_URI
 });
 
+const redisClient = redis.createClient(Number(process.env.REDIS_PORT), process.env.REDIS_HOST);
+
 // create reusable transporter object using the default SMTP transport
 export const transporter = nodemailer.createTransport({
   service: 'Gmail',
@@ -40,12 +43,12 @@ app.get('/discover', discover);
 app.get('/discover/:title', searchFilms);
 
 // New User registration route
-app.post('/register', handleRegister(db, transporter));
+app.post('/register', handleRegister(db, transporter, redisClient));
 
 // Route that recieves and checks confirmation code
-app.put('/register/confirm', handleConfirm(db));
+app.put('/register/confirm', handleConfirm(db, redisClient));
 
 // User login route
-app.post('/login', handleLogin(db, transporter));
+app.post('/login', handleLogin(db, transporter, redisClient));
 
 export default app;

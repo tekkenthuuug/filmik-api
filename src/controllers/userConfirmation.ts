@@ -1,15 +1,14 @@
 import Knex from 'knex';
 import { Request, Response } from 'express';
+import { RedisClient } from 'redis';
 
-const setUserVerified = (db: Knex, userID: number) => {
+const setUserVerified = (db: Knex, redisClient: RedisClient, userID: number) => {
   return new Promise<{ id: number }>((resolve, reject) => {
     db('login')
       .update({ verified: true })
       .where({ id: userID })
       .then(() => {
-        db('codes')
-          .where({ id: userID })
-          .del();
+        redisClient.del(String(userID));
         resolve({
           id: userID
         });
@@ -18,32 +17,30 @@ const setUserVerified = (db: Knex, userID: number) => {
 };
 
 /** Handles request with a confirmation code, verifyes account */
-export const handleConfirm = (db: Knex) => (req: Request, res: Response) => {
+export const handleConfirm = (db: Knex, redisClient: RedisClient) => (req: Request, res: Response) => {
   const { userID, code: clientCode } = req.body;
-  db.select('*')
-    .from('codes')
-    .where({ id: userID })
-    .then(([data]) => {
-      if (!data.code) {
-        return res.status(200).send({
-          errors: {
-            details: 'User already verified'
-          }
-        });
-      }
-
-      if (data.code !== clientCode) {
-        return res.status(200).send({
-          errors: {
-            details: 'Codes do not match'
-          }
-        });
-      }
-
-      setUserVerified(db, userID).then((data) => {
-        if (data.id) {
-          return res.status(200).send(data);
+  redisClient.get(userID, (err, repl) => {
+    console.log(repl);
+    if (!repl) {
+      return res.status(200).send({
+        errors: {
+          details: 'User already verified'
         }
       });
+    }
+
+    if (repl !== clientCode) {
+      return res.status(200).send({
+        errors: {
+          details: 'Codes do not match'
+        }
+      });
+    }
+
+    setUserVerified(db, redisClient, userID).then((data) => {
+      if (data.id) {
+        return res.status(200).send(data);
+      }
     });
+  });
 };

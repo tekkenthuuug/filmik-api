@@ -10,9 +10,4 @@ INSERT into users
 values
   (1, 'dardar', 'dardar@gmail.com', '2018-01-01');
 
-INSERT into codes
-  (id, email, code)
-values
-  (1, 'dardar@gmail.com', 'dardar');
-
 COMMIT;
