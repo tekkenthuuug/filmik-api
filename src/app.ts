@@ -2,12 +2,13 @@ import express from 'express';
 import knex from 'knex';
 import nodemailer from 'nodemailer';
 import morgan from 'morgan';
-import redis from 'redis';
+import redisClient from './redis';
 
 // Middleware
 import cors, { CorsOptions } from 'cors';
 import bodyParser from 'body-parser';
 import helmet from 'helmet';
+import requireAuth from './middleware/requireAuth';
 
 // Importing modules
 import { discover, searchFilms } from './controllers/TMDb';
@@ -27,10 +28,8 @@ const db = knex({
   connection: process.env.POSTGRES_URI
 });
 
-const redisClient = redis.createClient(Number(process.env.REDIS_PORT), process.env.REDIS_HOST);
-
 // create reusable transporter object using the default SMTP transport
-export const transporter = nodemailer.createTransport({
+const transporter = nodemailer.createTransport({
   service: 'Gmail',
   auth: {
     user: process.env.GMAIL_USER,

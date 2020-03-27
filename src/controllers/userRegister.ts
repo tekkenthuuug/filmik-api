@@ -1,11 +1,13 @@
-import { Request, Response } from 'express';
 import Knex from 'knex';
 import bcrypt from 'bcryptjs';
-import Mail from 'nodemailer/lib/mailer';
+
 import generateCode from '../util/generateCode';
 import sendEmailWithCode from '../util/sendEmailWithCode';
-import { RedisClient } from 'redis';
 import setUserCode from '../util/setRedisUserCode';
+
+import { RedisClient } from 'redis';
+import Mail from 'nodemailer/lib/mailer';
+import { Request, Response } from 'express';
 
 /** Registers new user */
 export const handleRegister = (db: Knex, transporter: Mail, redisClient: RedisClient) => (
@@ -34,8 +36,8 @@ export const handleRegister = (db: Knex, transporter: Mail, redisClient: RedisCl
             email,
             joined: new Date()
           })
-          .then(([data]) => {
-            res.status(200).send({ id: data });
+          .then(([id]) => {
+            res.status(200).send({ id });
             const confirmationCode = generateCode(6);
             setUserCode(redisClient, id, confirmationCode).then((isSet) => {
               if (isSet) {
