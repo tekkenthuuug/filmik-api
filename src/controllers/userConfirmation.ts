@@ -24,7 +24,7 @@ export const handleConfirm = (db: Knex, redisClient: RedisClient) => (req: Reque
   redisClient.get(userID, (err, repl) => {
     if (!repl) {
       return res.status(200).send({
-        errors: {
+        error: {
           details: 'User already verified'
         }
       });
@@ -32,7 +32,7 @@ export const handleConfirm = (db: Knex, redisClient: RedisClient) => (req: Reque
 
     if (repl !== clientCode) {
       return res.status(200).send({
-        errors: {
+        error: {
           details: 'Codes do not match'
         }
       });
