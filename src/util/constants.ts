@@ -1,4 +1,4 @@
-export const TMPDbAPI = 'https://api.themoviedb.org/3';
+export const TMDb_API = 'https://api.themoviedb.org/3';
 
 export const TMDb_GENRES: { [key: number]: string } = {
   28: 'Action',

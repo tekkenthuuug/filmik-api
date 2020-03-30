@@ -11,7 +11,7 @@ import helmet from 'helmet';
 import requireAuth from './middleware/requireAuth';
 
 // Importing modules
-import { discover, searchFilms } from './controllers/TMDb';
+import { discover, searchFilms, getFilm } from './controllers/TMDb';
 import { handleRegister } from './controllers/userRegister';
 import { handleConfirm } from './controllers/userConfirmation';
 import { handleLogin } from './controllers/userLogin';
@@ -40,6 +40,7 @@ const transporter = nodemailer.createTransport({
 // TMDb related API routes
 app.get('/discover', discover);
 app.get('/discover/:title', searchFilms);
+app.get('/movie/:id', getFilm);
 
 // New User registration route
 app.post('/register', handleRegister(db, transporter, redisClient));
